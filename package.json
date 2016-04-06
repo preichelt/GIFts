@@ -1,0 +1,37 @@
+{
+  "name": "reddit-gifs",
+  "version": "0.0.1",
+  "description": "Reddit gif searcher",
+  "main": "index.js",
+  "scripts": {
+    "start": "./script/development/start",
+    "stop": "./script/development/stop",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "Phillip Reichelt <preichelt@ou.edu>",
+  "license": "MIT",
+  "dependencies": {
+    "babel-preset-node5": "^11.0.1",
+    "babel-register": "^6.7.2",
+    "body-parser": "^1.15.0",
+    "compression": "^1.6.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "resource-router-middleware": "^0.6.0",
+    "request-promise": "^2.0.1",
+    "pm2": "^1.0.2"
+  },
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "keywords": [
+    "gifs",
+    "reddit",
+    "reddit gifs"
+  ]
+}

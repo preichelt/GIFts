@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+GREEN="\033[0;32m"
+DEFAULT="\033[0m"
+
+echo -e "${GREEN}Starting app${DEFAULT}"
+$(npm bin)/pm2 start ecosystem.json --env development

@@ -1,0 +1,23 @@
+{
+  "apps": [
+    {
+      "name": "reddit-gifs",
+      "script": "index.js",
+      "watch": "true",
+      "ignore_watch": [".git", "node_modules", "script"],
+      "env": {
+      },
+      "env_development": {
+        "NODE_ENV": "development"
+      },
+      "env_production": {
+        "NODE_ENV": "production"
+      },
+      "env_staging": {
+        "NODE_ENV": "staging",
+        "TEST": true
+      },
+      "autorestart": true
+    }
+  ]
+}
