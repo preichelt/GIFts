@@ -5,5 +5,5 @@ GREEN="\033[0;32m"
 DEFAULT="\033[0m"
 
 echo -e "${GREEN}Stopping app${DEFAULT}"
-$(npm bin)/pm2 stop reddit-gifs
-$(npm bin)/pm2 delete reddit-gifs
+$(npm bin)/pm2 stop GIFts
+$(npm bin)/pm2 delete GIFts

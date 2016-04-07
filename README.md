@@ -1,4 +1,4 @@
-reddit-gifs
+GIFts
 ==================================
 
 
@@ -10,7 +10,11 @@ Getting Started
 # install dependencies
 npm install
 
+# start api
 npm start
+
+# stop api
+npm stop
 ```
 
 

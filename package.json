@@ -1,5 +1,5 @@
 {
-  "name": "reddit-gifs",
+  "name": "GIFts",
   "version": "0.0.1",
   "description": "Reddit gif searcher",
   "main": "index.js",
