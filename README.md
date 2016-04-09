@@ -10,11 +10,23 @@ Getting Started
 # install dependencies
 npm install
 
-# start api
+# start app
 npm start
 
-# stop api
+# restart app
+npm restart
+
+# stop app
 npm stop
+
+# check app status
+npm run status
+
+# tail app logs
+npm run logs
+
+# flush app logs
+npm run logs:flush
 ```
 
 
