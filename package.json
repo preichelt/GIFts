@@ -1,16 +1,22 @@
 {
   "name": "GIFts",
-  "version": "0.0.1",
-  "description": "Reddit gif searcher",
+  "version": "0.0.2",
+  "description": "Give the gift of gifs on Slack (Giphy alternative)",
   "main": "index.js",
   "scripts": {
-    "start": "./script/development/start",
-    "stop": "./script/development/stop",
+    "start": "$(npm bin)/pm2 start ecosystem.json --env development",
+    "start:prod": "$(npm bin)/pm2 start ecosystem.json --env production --no-daemon",
+    "stop": "$(npm bin)/pm2 stop GIFts && $(npm bin)/pm2 delete GIFts",
+    "restart": "$(npm bin)/pm2 restart GIFts",
+    "status": "$(npm bin)/pm2 status",
+    "logs": "$(npm bin)/pm2 logs",
+    "logs:flush": "$(npm bin)/pm2 flush",
+    "update": "$(npm bin)/pm2 update",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/preichelt/GIFts.git"
   },
   "author": "Phillip Reichelt <preichelt@ou.edu>",
   "license": "MIT",
@@ -21,17 +27,19 @@
     "compression": "^1.6.1",
     "cors": "^2.7.1",
     "express": "^4.13.4",
-    "resource-router-middleware": "^0.6.0",
-    "request-promise": "^2.0.1",
-    "pm2": "^1.0.2"
+    "lodash": "^4.9.0",
+    "pm2": "^1.1.1",
+    "request-promise": "^2.0.1"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/preichelt/GIFts/issues"
   },
-  "homepage": "",
+  "homepage": "https://github.com/preichelt/GIFts",
   "keywords": [
     "gifs",
+    "imgur",
     "reddit",
-    "reddit gifs"
+    "slack",
+    "giphy"
   ]
 }

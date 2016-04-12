@@ -4,7 +4,7 @@
       "name": "GIFts",
       "script": "index.js",
       "watch": "true",
-      "ignore_watch": [".git", "node_modules", "script"],
+      "ignore_watch": [".git", "node_modules"],
       "env": {
       },
       "env_development": {
