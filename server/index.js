@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import api from './api';
 
-var app = express();
+const app = express();
 app.server = http.createServer(app);
 
 app.use(cors({

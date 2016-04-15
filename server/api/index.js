@@ -1,33 +1,31 @@
 import { Router } from 'express';
-import { imgur, reddit } from './../models/gif';
+import { Imgur } from './../models/imgur';
+import { Reddit } from './../models/reddit';
 
 export default function() {
-	var api = Router();
+	const api = Router();
 
-	api.post('/gifs/imgur', (req, res) => {
-		let searchTerm = req.body.text;
-		let user = req.body.user_name;
-		let responseUrl = req.body.response_url;
+	api.post('/images/:site/:ext', (req, res) => {
+	 	const site = req.params.site;
+		const ext = req.params.ext;
+		const searchTerm = req.body.text;
+		const user = req.body.user_name;
+		const responseUrl = req.body.response_url;
+
+		console.log(`site: ${site}, ext: ${ext}, searchTerm: ${searchTerm}, user: ${user}`);
 
 		res.json({
-			text: `:mag: searching for *${searchTerm}* on imgur :hourglass_flowing_sand:`,
+			text: `:mag: searching for *${searchTerm}* ${ext} on ${site} :hourglass_flowing_sand:`,
 			mrkdwn: true
 		});
 
-		imgur(searchTerm, user, responseUrl);
-	});
-
-	api.post('/gifs/reddit', (req, res) => {
-		let searchTerm = req.body.text;
-		let user = req.body.user_name;
-		let responseUrl = req.body.response_url;
-
-		res.json({
-			text: `:mag: searching for *${searchTerm}* on reddit :hourglass_flowing_sand:`,
-			mrkdwn: true
-		});
-
-		reddit(searchTerm, user, responseUrl);
+		if (site == 'imgur') {
+			const imgur = new Imgur(responseUrl, user, searchTerm, ext);
+			imgur.search();
+		} else if (site == 'reddit') {
+			const reddit = new Reddit(responseUrl, user, searchTerm);
+			reddit.search();
+		}
 	});
 
 	return api;
