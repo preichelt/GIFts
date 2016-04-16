@@ -2,6 +2,7 @@ import { Base } from './base';
 import rp from 'request-promise';
 import _replace from 'lodash/replace';
 import _each from 'lodash/each';
+import _times from 'lodash/times';
 
 export class Imgur extends Base {
   constructor(responseUrl, user, searchTerm, ext) {
@@ -9,8 +10,11 @@ export class Imgur extends Base {
     this.ext = ext;
   }
 
-  options(searchType) {
-    const uriBase = 'http://imgur.com/search/score/all/page/1.json';
+  options(searchType, page) {
+    console.log(`searchTerm: ${
+      this.searchTerm
+    }, searchType: ${searchType}, page: ${page}`);
+    const uriBase = `http://imgur.com/search/score/all/page/${page}.json`;
     const qType = `q_type=${this.ext}`;
     const qSearch = `q_${searchType}=${_replace(this.searchTerm, ' ', '%20')}`;
 
@@ -24,13 +28,13 @@ export class Imgur extends Base {
     };
   }
 
-  handleSearchResults(results) {
+  parseSearchData(data) {
     const urls = [];
 
-    _each(this.reverseFilter(results.data, function(result) {
-      return result.nsfw == false;
-    }), (result, index) => {
-      const url = `http://i.imgur.com/${result.hash}.${this.ext}`;
+    _each(this.reverseFilter(data, image => {
+      return image.nsfw == false;
+    }), (image, index) => {
+      const url = `http://i.imgur.com/${image.hash}.${this.ext}`;
       urls.push(...this.weightedUrl(url, index));
     });
 
@@ -38,16 +42,38 @@ export class Imgur extends Base {
   }
 
   search() {
-    rp(this.options('all')).then((imgurAllOfResults) => {
-      const weightedAllOfUrls = this.handleSearchResults(imgurAllOfResults);
+    Promise.all(_times(5, i => rp(this.options('all', i + 1))))
+    .then(([allP1Res, allP2Res, allP3Res, allP4Res, allP5Res]) => {
+      const allData = allP1Res.data;
+      allData.push(...allP2Res.data);
+      allData.push(...allP3Res.data);
+      allData.push(...allP4Res.data);
+      allData.push(...allP5Res.data);
 
-      if (weightedAllOfUrls.length == 0) {
-        this.slack.sendNoUrlsResponse(this.ext);
+      const weightedAllUrls = this.parseSearchData(allData);
+
+      if (weightedAllUrls.length == 0) {
+        rp(this.options('any', 1))
+        .then(anyRes => {
+          const anyData = anyRes.data;
+          const weightedAnyUrls = this.parseSearchData(anyData);
+
+          if (weightedAnyUrls.length == 0) {
+            this.slack.sendNoUrlsResponse(this.ext);
+          } else {
+            const url = this.selectRandom(weightedAnyUrls);
+            this.slack.sendUrlResponse(url, this.user);
+          }
+        })
+        .catch(error => {
+          this.slack.sendErrorResponse();
+        });
       } else {
-        const url = this.selectRandom(weightedAllOfUrls);
+        const url = this.selectRandom(weightedAllUrls);
         this.slack.sendUrlResponse(url, this.user);
       }
-    }).catch((error) => {
+    })
+    .catch(error => {
       this.slack.sendErrorResponse();
     });
   }

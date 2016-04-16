@@ -21,21 +21,29 @@ export class Slack {
   }
 
   sendErrorResponse() {
-    const bodyText = `:warning: error searching for *${this.searchTerm}* on ${this.site} please try again :warning:`;
+    const bodyText = `:warning: error searching for *${
+      this.searchTerm
+    }* on ${this.site} please try again :warning:`;
 
-    rp(this.options(bodyText)).then(function(results) {
+    rp(this.options(bodyText))
+    .then(results => {
       console.log('successfully responded with ERROR to slack');
-    }).catch(function(error) {
+    })
+    .catch(error => {
       console.log(`failed responding with ERROR to slack: ${error.message}`);
     });
   }
 
   sendNoUrlsResponse(ext = 'gif') {
-    const bodyText = `:zero: ${ext}s found for *${this.searchTerm}* on ${this.site} :thumbsdown:`;
+    const bodyText = `:zero: ${ext}s found for *${
+      this.searchTerm
+    }* on ${this.site} :thumbsdown:`;
 
-    rp(this.options(bodyText)).then(function(results) {
+    rp(this.options(bodyText))
+    .then(results => {
       console.log('successfully responded with NO URL to slack');
-    }).catch(function(error) {
+    })
+    .catch(error => {
       console.log(`failed responding with NO URL to slack: ${error.message}`);
     });
   }
@@ -43,9 +51,11 @@ export class Slack {
   sendUrlResponse(url, user) {
     const bodyText = `${user} requested *${this.searchTerm}* \n ${url}`;
 
-    rp(this.options(bodyText, 'in_channel')).then(function(results) {
+    rp(this.options(bodyText, 'in_channel'))
+    .then(results => {
       console.log(`successfully responded with ${url} to slack`);
-    }).catch(function(error) {
+    })
+    .catch(error => {
       console.log(`failed responding with ${url} to slack: ${error.message}`);
     });
   }

@@ -87,11 +87,11 @@ export class Reddit extends Base {
     };
   }
 
-  handleSearchResults(results) {
+  parseSearchData(data) {
     const urls = [];
 
-    _each(this.reverseFilter(results.data.children, function(result) {
-      const url = result.data.url;
+    _each(this.reverseFilter(data.children, image => {
+      const url = image.data.url;
 
       return url.includes('imgur') && !(
         url.includes('gallery') ||
@@ -100,8 +100,8 @@ export class Reddit extends Base {
         url.includes('/a/') ||
         url.includes('/r/')
       );
-    }), (result, index) => {
-      const url = `${_split(result.data.url, '.gif')[0]}.gif`;
+    }), (image, index) => {
+      const url = `${_split(image.data.url, '.gif')[0]}.gif`;
       urls.push(...this.weightedUrl(url, index));
     });
 
@@ -109,8 +109,10 @@ export class Reddit extends Base {
   }
 
   search() {
-    rp(this.options).then((redditResults) => {
-      const weightedUrls = this.handleSearchResults(redditResults);
+    rp(this.options)
+    .then(results => {
+      const data = results.data;
+      const weightedUrls = this.parseSearchData(data);
 
       if (weightedUrls.length == 0) {
         this.slack.sendNoUrlsResponse();
@@ -119,7 +121,8 @@ export class Reddit extends Base {
         this.slack.sendUrlResponse(url, this.user);
       }
 
-    }).catch((error) => {
+    })
+    .catch(error => {
       this.slack.sendErrorResponse();
     });
   }

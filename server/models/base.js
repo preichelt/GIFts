@@ -1,4 +1,5 @@
 import { Slack } from './slack';
+import _replace from 'lodash/replace';
 import _filter from 'lodash/filter';
 import _reverse from 'lodash/reverse';
 import _times from 'lodash/times';
@@ -8,7 +9,7 @@ export class Base {
   constructor(responseUrl, user, searchTerm, site) {
     this.slack = new Slack(responseUrl, searchTerm, site);
     this.user = user;
-    this.searchTerm = searchTerm;
+    this.searchTerm = _replace(searchTerm, '\'', '');
   }
 
   reverseFilter(data, callback) {
@@ -16,7 +17,7 @@ export class Base {
   }
 
   weightedUrl(url, index) {
-    return _times(index + 1, function(i) { return url });
+    return _times(index + 1, i => url);
   }
 
   selectRandom(urls) {

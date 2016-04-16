@@ -12,10 +12,14 @@ export default function() {
 		const user = req.body.user_name;
 		const responseUrl = req.body.response_url;
 
-		console.log(`site: ${site}, ext: ${ext}, searchTerm: ${searchTerm}, user: ${user}`);
+		console.log(`site: ${site}, ext: ${ext}, searchTerm: ${
+			searchTerm
+		}, user: ${user}`);
 
 		res.json({
-			text: `:mag: searching for *${searchTerm}* ${ext} on ${site} :hourglass_flowing_sand:`,
+			text: `:mag: searching for *${
+				searchTerm
+			}* ${ext} on ${site} :hourglass_flowing_sand:`,
 			mrkdwn: true
 		});
 
