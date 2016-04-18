@@ -32,7 +32,7 @@ export class Imgur extends Base {
     const urls = [];
 
     _each(this.reverseFilter(data, image => {
-      return image.nsfw == false;
+      return image.nsfw == false && image.size < 50000000;
     }), (image, index) => {
       const url = `http://i.imgur.com/${image.hash}.${this.ext}`;
       urls.push(...this.weightedUrl(url, index));

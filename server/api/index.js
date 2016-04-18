@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { Imgur } from './../models/imgur';
 import { Reddit } from './../models/reddit';
+import { Gfycat } from './../models/gfycat';
 
 export default function() {
 	const api = Router();
@@ -23,12 +24,21 @@ export default function() {
 			mrkdwn: true
 		});
 
-		if (site == 'imgur') {
-			const imgur = new Imgur(responseUrl, user, searchTerm, ext);
-			imgur.search();
-		} else if (site == 'reddit') {
-			const reddit = new Reddit(responseUrl, user, searchTerm);
-			reddit.search();
+		switch(site) {
+			case 'imgur':
+				const imgur = new Imgur(responseUrl, user, searchTerm, ext);
+				imgur.search();
+				break;
+			case 'reddit':
+				const reddit = new Reddit(responseUrl, user, searchTerm);
+				reddit.search();
+				break;
+			case 'gfycat':
+				const gfycat = new Gfycat(responseUrl, user, searchTerm);
+				gfycat.search();
+				break;
+			default:
+				console.log('undefined site');
 		}
 	});
 

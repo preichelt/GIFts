@@ -13,6 +13,7 @@ export class Slack {
       uri: this.responseUrl,
       body: {
         text: bodyText,
+        unfurl_links: true,
         mrkdwn: true,
         response_type: responseType
       },
@@ -49,7 +50,7 @@ export class Slack {
   }
 
   sendUrlResponse(url, user) {
-    const bodyText = `${user} requested *${this.searchTerm}* \n ${url}`;
+    const bodyText = `${user} requested <${url}|${this.searchTerm}>`;
 
     rp(this.options(bodyText, 'in_channel'))
     .then(results => {
