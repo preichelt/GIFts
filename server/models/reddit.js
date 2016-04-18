@@ -90,7 +90,7 @@ export class Reddit extends Base {
   parseSearchData(data) {
     const urls = [];
 
-    _each(this.reverseFilter(data.children, image => {
+    _each(this.reverseFilter(data, image => {
       const url = image.data.url;
 
       return url.includes('imgur') && !(
@@ -111,7 +111,7 @@ export class Reddit extends Base {
   search() {
     rp(this.options)
     .then(results => {
-      const data = results.data;
+      const data = results.data.children;
       const weightedUrls = this.parseSearchData(data);
 
       if (weightedUrls.length == 0) {
