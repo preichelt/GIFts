@@ -33,21 +33,25 @@ export class Gfycat extends Base {
     return urls;
   }
 
-  search() {
-    rp(this.options)
-    .then(results => {
-      const data = results.gfycats;
-      const weightedUrls = this.parseSearchData(data);
+  request() {
+    return rp(this.options);
+  }
 
-      if (weightedUrls.length == 0) {
-        this.slack.sendNoUrlsResponse();
-      } else {
-        const url = this.selectRandom(weightedUrls);
-        this.slack.sendUrlResponse(url, this.user);
-      }
-    })
-    .catch(error => {
-      this.slack.sendErrorResponse();
-    });
+  search() {
+    this.request()
+      .then(results => {
+        const data = results.gfycats;
+        const weightedUrls = this.parseSearchData(data);
+
+        if (weightedUrls.length == 0) {
+          this.slack.sendNoUrlsResponse();
+        } else {
+          const url = this.selectRandom(weightedUrls);
+          this.slack.sendUrlResponse(url, this.user);
+        }
+      })
+      .catch(error => {
+        this.slack.sendErrorResponse();
+      });
   }
 }
