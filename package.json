@@ -1,6 +1,6 @@
 {
   "name": "GIFts",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Give the gift of gifs on Slack (Giphy alternative)",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "logs": "$(npm bin)/pm2 logs",
     "logs:flush": "$(npm bin)/pm2 flush",
     "update": "$(npm bin)/pm2 update",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "$(npm bin)/ava -v -r babel-register"
   },
   "repository": {
     "type": "git",
@@ -38,8 +38,13 @@
   "keywords": [
     "gifs",
     "imgur",
+    "gfycat",
     "reddit",
     "slack",
     "giphy"
-  ]
+  ],
+  "devDependencies": {
+    "ava": "^0.14.0",
+    "supertest": "^1.2.0"
+  }
 }

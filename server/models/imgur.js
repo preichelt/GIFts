@@ -11,9 +11,6 @@ export class Imgur extends Base {
   }
 
   options(searchType, page) {
-    console.log(`searchTerm: ${
-      this.searchTerm
-    }, searchType: ${searchType}, page: ${page}`);
     const uriBase = `http://imgur.com/search/score/all/page/${page}.json`;
     const qType = `q_type=${this.ext}`;
     const qSearch = `q_${searchType}=${_replace(this.searchTerm, ' ', '%20')}`;
@@ -41,40 +38,44 @@ export class Imgur extends Base {
     return urls;
   }
 
+  request() {
+    return Promise.all(_times(5, i => rp(this.options('all', i + 1))));
+  }
+
   search() {
-    Promise.all(_times(5, i => rp(this.options('all', i + 1))))
-    .then(([allP1Res, allP2Res, allP3Res, allP4Res, allP5Res]) => {
-      const allData = allP1Res.data;
-      allData.push(...allP2Res.data);
-      allData.push(...allP3Res.data);
-      allData.push(...allP4Res.data);
-      allData.push(...allP5Res.data);
+    this.request()
+      .then(([allP1Res, allP2Res, allP3Res, allP4Res, allP5Res]) => {
+        const allData = allP1Res.data;
+        allData.push(...allP2Res.data);
+        allData.push(...allP3Res.data);
+        allData.push(...allP4Res.data);
+        allData.push(...allP5Res.data);
 
-      const weightedAllUrls = this.parseSearchData(allData);
+        const weightedAllUrls = this.parseSearchData(allData);
 
-      if (weightedAllUrls.length == 0) {
-        rp(this.options('any', 1))
-        .then(anyRes => {
-          const anyData = anyRes.data;
-          const weightedAnyUrls = this.parseSearchData(anyData);
+        if (weightedAllUrls.length == 0) {
+          rp(this.options('any', 1))
+            .then(anyRes => {
+              const anyData = anyRes.data;
+              const weightedAnyUrls = this.parseSearchData(anyData);
 
-          if (weightedAnyUrls.length == 0) {
-            this.slack.sendNoUrlsResponse(this.ext);
-          } else {
-            const url = this.selectRandom(weightedAnyUrls);
-            this.slack.sendUrlResponse(url, this.user);
-          }
-        })
-        .catch(error => {
-          this.slack.sendErrorResponse();
-        });
-      } else {
-        const url = this.selectRandom(weightedAllUrls);
-        this.slack.sendUrlResponse(url, this.user);
-      }
-    })
-    .catch(error => {
-      this.slack.sendErrorResponse();
-    });
+              if (weightedAnyUrls.length == 0) {
+                this.slack.sendNoUrlsResponse(this.ext);
+              } else {
+                const url = this.selectRandom(weightedAnyUrls);
+                this.slack.sendUrlResponse(url, this.user);
+              }
+            })
+            .catch(error => {
+              this.slack.sendErrorResponse();
+            });
+        } else {
+          const url = this.selectRandom(weightedAllUrls);
+          this.slack.sendUrlResponse(url, this.user);
+        }
+      })
+      .catch(error => {
+        this.slack.sendErrorResponse();
+      });
   }
 }

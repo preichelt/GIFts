@@ -8,7 +8,7 @@ export class Reddit extends Base {
   constructor(responseUrl, user, searchTerm) {
     super(responseUrl, user, searchTerm, 'reddit');
 
-    const subreddits = [
+    this.subreddits = [
       'gifs',
       'gif',
       'reactiongifs',
@@ -73,7 +73,7 @@ export class Reddit extends Base {
     ].join('+');
 
     this.options = {
-      uri: `https://www.reddit.com/r/${subreddits}/search.json`,
+      uri: `https://www.reddit.com/r/${this.subreddits}/search.json`,
       headers: {
         referer: 'https://www.reddit.com'
       },
@@ -108,22 +108,26 @@ export class Reddit extends Base {
     return urls;
   }
 
+  request() {
+    return rp(this.options);
+  }
+
   search() {
-    rp(this.options)
-    .then(results => {
-      const data = results.data.children;
-      const weightedUrls = this.parseSearchData(data);
+    this.request()
+      .then(results => {
+        const data = results.data.children;
+        const weightedUrls = this.parseSearchData(data);
 
-      if (weightedUrls.length == 0) {
-        this.slack.sendNoUrlsResponse();
-      } else {
-        const url = this.selectRandom(weightedUrls);
-        this.slack.sendUrlResponse(url, this.user);
-      }
+        if (weightedUrls.length == 0) {
+          this.slack.sendNoUrlsResponse();
+        } else {
+          const url = this.selectRandom(weightedUrls);
+          this.slack.sendUrlResponse(url, this.user);
+        }
 
-    })
-    .catch(error => {
-      this.slack.sendErrorResponse();
-    });
+      })
+      .catch(error => {
+        this.slack.sendErrorResponse();
+      });
   }
 }
