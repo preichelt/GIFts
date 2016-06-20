@@ -5,9 +5,10 @@ import _each from 'lodash/each';
 import _times from 'lodash/times';
 
 export class Imgur extends Base {
-  constructor(responseUrl, user, searchTerm, ext) {
-    super(responseUrl, user, searchTerm, 'imgur');
-    this.ext = ext;
+  constructor(opts) {
+    super(opts);
+    this.ext = opts.ext;
+    this.rp = rp;
   }
 
   options(searchType, page) {
@@ -31,51 +32,61 @@ export class Imgur extends Base {
     _each(this.reverseFilter(data, image => {
       return image.nsfw == false && image.size < 50000000;
     }), (image, index) => {
-      const url = `http://i.imgur.com/${image.hash}.${this.ext}`;
-      urls.push(...this.weightedUrl(url, index));
+      const imageId = image.hash;
+      const url = `http://i.imgur.com/${imageId}.${this.ext}`;
+      urls.push(...this.weightedUrl(
+        {
+          site: 'imgur',
+          id: imageId,
+          image_url: url
+        },
+        index
+      ));
     });
 
     return urls;
   }
 
   request() {
-    return Promise.all(_times(5, i => rp(this.options('all', i + 1))));
+    return Promise.all(_times(5, i => this.rp(this.options('all', i + 1))));
   }
 
   search() {
     this.request()
       .then(([allP1Res, allP2Res, allP3Res, allP4Res, allP5Res]) => {
-        const allData = allP1Res.data;
-        allData.push(...allP2Res.data);
-        allData.push(...allP3Res.data);
-        allData.push(...allP4Res.data);
-        allData.push(...allP5Res.data);
+        const allData = [
+          ...(allP1Res.data),
+          ...(allP2Res.data),
+          ...(allP3Res.data),
+          ...(allP4Res.data),
+          ...(allP5Res.data)
+        ];
 
         const weightedAllUrls = this.parseSearchData(allData);
 
         if (weightedAllUrls.length == 0) {
-          rp(this.options('any', 1))
+          this.rp(this.options('any', 1))
             .then(anyRes => {
               const anyData = anyRes.data;
               const weightedAnyUrls = this.parseSearchData(anyData);
 
               if (weightedAnyUrls.length == 0) {
-                this.slack.sendNoUrlsResponse(this.ext);
+                this.sendNoUrlsResponse(this.ext);
               } else {
                 const url = this.selectRandom(weightedAnyUrls);
-                this.slack.sendUrlResponse(url, this.user);
+                this.sendDataResponse(url);
               }
             })
             .catch(error => {
-              this.slack.sendErrorResponse();
+              this.sendErrorResponse();
             });
         } else {
           const url = this.selectRandom(weightedAllUrls);
-          this.slack.sendUrlResponse(url, this.user);
+          this.sendDataResponse(url);
         }
       })
       .catch(error => {
-        this.slack.sendErrorResponse();
+        this.sendErrorResponse();
       });
   }
 }

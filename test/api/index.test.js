@@ -1,8 +1,9 @@
 import test from 'ava';
-import request from 'supertest';
+import request from 'supertest-as-promised';
+import sinon from 'sinon';
 import app from './../../server/index.js';
 
-const body = [
+const postBody = [
   'token=gIkuvaNzQIHg97ATvDxqgjtO',
   'team_id=T0001',
   'team_domain=example',
@@ -14,16 +15,18 @@ const body = [
   'text=test',
 ].join('&');
 
-test('POST /api/images/imgur/gif', t => {
+test.before(t => {
+  sinon.stub(console, 'log');
+});
+
+test('POST /api/slack/imgur/gif', t => {
   request(app)
-    .post('/api/images/imgur/gif')
-    .send(body)
+    .post('/api/slack/imgur/gif')
+    .send(postBody)
     .expect(200)
     .expect('Content-Type', /json/)
-    .end((err, res) => {
-      t.plan(3);
-
-      t.ifError(err);
+    .then(res => {
+      t.plan(2);
 
       t.is(
         res.body.text,
@@ -31,20 +34,24 @@ test('POST /api/images/imgur/gif', t => {
       );
 
       t.is(res.body.mrkdwn, true);
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
       app.server.close();
     });
 });
 
-test('POST /api/images/imgur/jpg', t => {
+test('POST /api/slack/imgur/jpg', t => {
   request(app)
-    .post('/api/images/imgur/jpg')
-    .send(body)
+    .post('/api/slack/imgur/jpg')
+    .send(postBody)
     .expect(200)
     .expect('Content-Type', /json/)
-    .end((err, res) => {
-      t.plan(3);
-
-      t.ifError(err);
+    .then(res => {
+      t.plan(2);
 
       t.is(
         res.body.text,
@@ -52,20 +59,24 @@ test('POST /api/images/imgur/jpg', t => {
       );
 
       t.is(res.body.mrkdwn, true);
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
       app.server.close();
     });
 });
 
-test('POST /api/images/imgur/png', t => {
+test('POST /api/slack/imgur/png', t => {
   request(app)
-    .post('/api/images/imgur/png')
-    .send(body)
+    .post('/api/slack/imgur/png')
+    .send(postBody)
     .expect(200)
     .expect('Content-Type', /json/)
-    .end((err, res) => {
-      t.plan(3);
-
-      t.ifError(err);
+    .then(res => {
+      t.plan(2);
 
       t.is(
         res.body.text,
@@ -73,20 +84,24 @@ test('POST /api/images/imgur/png', t => {
       );
 
       t.is(res.body.mrkdwn, true);
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
       app.server.close();
     });
 });
 
-test('POST /api/images/gfycat/gif', t => {
+test('POST /api/slack/gfycat/gif', t => {
   request(app)
-    .post('/api/images/gfycat/gif')
-    .send(body)
+    .post('/api/slack/gfycat/gif')
+    .send(postBody)
     .expect(200)
     .expect('Content-Type', /json/)
-    .end((err, res) => {
-      t.plan(3);
-
-      t.ifError(err);
+    .then(res => {
+      t.plan(2);
 
       t.is(
         res.body.text,
@@ -94,20 +109,24 @@ test('POST /api/images/gfycat/gif', t => {
       );
 
       t.is(res.body.mrkdwn, true);
+
       app.server.close();
-    });
+    })
+    .catch(err => {
+      t.fail();
+
+      app.server.close();
+    })
 });
 
-test('POST /api/images/reddit/gif', t => {
+test('POST /api/slack/reddit/gif', t => {
   request(app)
-    .post('/api/images/reddit/gif')
-    .send(body)
+    .post('/api/slack/reddit/gif')
+    .send(postBody)
     .expect(200)
     .expect('Content-Type', /json/)
-    .end((err, res) => {
-      t.plan(3);
-
-      t.ifError(err);
+    .then(res => {
+      t.plan(2);
 
       t.is(
         res.body.text,
@@ -115,6 +134,69 @@ test('POST /api/images/reddit/gif', t => {
       );
 
       t.is(res.body.mrkdwn, true);
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
+      app.server.close();
+    });
+});
+
+test('GET /api/gifs/imgur', t => {
+  request(app)
+    .get('/api/gifs/imgur?q=test&e=gif')
+    .expect(200)
+    .expect('Content-Type', /json/)
+    .then(res => {
+      t.plan(1);
+
+      t.true(res.body.hasOwnProperty('url'))
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
+      app.server.close();
+    });
+});
+
+test('GET /api/gifs/reddit', t => {
+  request(app)
+    .get('/api/gifs/reddit?q=test')
+    .expect(200)
+    .expect('Content-Type', /json/)
+    .then(res => {
+      t.plan(1);
+
+      t.true(res.body.hasOwnProperty('url'))
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
+      app.server.close();
+    });
+});
+
+test('GET /api/gifs/gfycat', t => {
+  request(app)
+    .get('/api/gifs/gfycat?q=test')
+    .expect(200)
+    .expect('Content-Type', /json/)
+    .then(res => {
+      t.plan(1);
+
+      t.true(res.body.hasOwnProperty('url'))
+
+      app.server.close();
+    })
+    .catch(err => {
+      t.fail();
+
       app.server.close();
     });
 });
