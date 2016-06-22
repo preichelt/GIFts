@@ -5,8 +5,8 @@ import _each from 'lodash/each';
 import _split from 'lodash/split';
 
 export class Reddit extends Base {
-  constructor(responseUrl, user, searchTerm) {
-    super(responseUrl, user, searchTerm, 'reddit');
+  constructor(opts) {
+    super(opts);
 
     this.subreddits = [
       'gifs',
@@ -78,13 +78,15 @@ export class Reddit extends Base {
         referer: 'https://www.reddit.com'
       },
       qs: {
-        q: _replace(searchTerm, ' ', '+'),
+        q: _replace(this.searchTerm, ' ', '+'),
         restrict_sr: 'on',
         sort: 'relevance',
         t: 'all'
       },
       json: true
     };
+
+    this.rp = rp;
   }
 
   parseSearchData(data) {
@@ -93,23 +95,51 @@ export class Reddit extends Base {
     _each(this.reverseFilter(data, image => {
       const url = image.data.url;
 
-      return url.includes('imgur') && !(
-        url.includes('gallery') ||
-        url.includes('jpg') ||
-        url.includes('png') ||
-        url.includes('/a/') ||
-        url.includes('/r/')
-      );
+      return url.includes('gfycat') ||
+        (url.includes('imgur') && !(
+          url.includes('gallery') ||
+          url.includes('jpg') ||
+          url.includes('png') ||
+          url.includes('/a/') ||
+          url.includes('/r/')
+        ));
     }), (image, index) => {
-      const url = `${_split(image.data.url, '.gif')[0]}.gif`;
-      urls.push(...this.weightedUrl(url, index));
+      const url = image.data.url;
+
+      if(url.includes('gfycat')) {
+        const imageId = _split(url, '.com/')[1];
+        const gifUrl = `https://giant.gfycat.com/${imageId}.gif`;
+        const iframeUrl = `https://gfycat.com/ifr/${imageId}`;
+        urls.push(...this.weightedUrl(
+          {
+            site: 'gfycat',
+            id: imageId,
+            orig_url: url,
+            image_url: gifUrl,
+            iframe_url: iframeUrl
+          },
+          index
+        ));
+      } else {
+        const imageId = _split(_split(url, '.gif')[0], '.com/')[1];
+        const gifUrl = `http://i.imgur.com/${imageId}.gif`;
+        urls.push(...this.weightedUrl(
+          {
+            site: 'imgur',
+            id: imageId,
+            orig_url: url,
+            image_url: gifUrl
+          },
+          index
+        ));
+      }
     });
 
     return urls;
   }
 
   request() {
-    return rp(this.options);
+    return this.rp(this.options);
   }
 
   search() {
@@ -119,15 +149,15 @@ export class Reddit extends Base {
         const weightedUrls = this.parseSearchData(data);
 
         if (weightedUrls.length == 0) {
-          this.slack.sendNoUrlsResponse();
+          this.sendNoUrlsResponse();
         } else {
           const url = this.selectRandom(weightedUrls);
-          this.slack.sendUrlResponse(url, this.user);
+          this.sendDataResponse(url);
         }
 
       })
       .catch(error => {
-        this.slack.sendErrorResponse();
+        this.sendErrorResponse();
       });
   }
 }

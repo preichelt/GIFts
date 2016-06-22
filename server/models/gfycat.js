@@ -2,10 +2,11 @@ import { Base } from './base';
 import rp from 'request-promise';
 import _replace from 'lodash/replace';
 import _each from 'lodash/each';
+import _split from 'lodash/split';
 
 export class Gfycat extends Base {
-  constructor(responseUrl, user, searchTerm) {
-    super(responseUrl, user, searchTerm, 'gfycat');
+  constructor(opts) {
+    super(opts);
 
     this.options = {
       uri: 'https://api.gfycat.com/v1/gfycats/search',
@@ -18,6 +19,8 @@ export class Gfycat extends Base {
       },
       json: true
     };
+
+    this.rp = rp;
   }
 
   parseSearchData(data) {
@@ -26,15 +29,27 @@ export class Gfycat extends Base {
     _each(this.reverseFilter(data, image => {
       return image.nsfw == "0" && image.gifSize < 50000000;
     }), (image, index) => {
-      const url = image.gifUrl;
-      urls.push(...this.weightedUrl(url, index));
+      const origUrl = image.gifUrl;
+      const imageId = _split(_split(origUrl, '.com/')[1], '.gif')[0];
+      const gifUrl = `https://giant.gfycat.com/${imageId}.gif`;
+      const iframeUrl = `https://gfycat.com/ifr/${imageId}`;
+      urls.push(...this.weightedUrl(
+        {
+          site: 'gfycat',
+          id: imageId,
+          orig_url: origUrl,
+          image_url: gifUrl,
+          iframe_url: iframeUrl
+        },
+        index
+      ));
     });
 
     return urls;
   }
 
   request() {
-    return rp(this.options);
+    return this.rp(this.options);
   }
 
   search() {
@@ -44,14 +59,14 @@ export class Gfycat extends Base {
         const weightedUrls = this.parseSearchData(data);
 
         if (weightedUrls.length == 0) {
-          this.slack.sendNoUrlsResponse();
+          this.sendNoUrlsResponse();
         } else {
           const url = this.selectRandom(weightedUrls);
-          this.slack.sendUrlResponse(url, this.user);
+          this.sendDataResponse(url);
         }
       })
       .catch(error => {
-        this.slack.sendErrorResponse();
+        this.sendErrorResponse();
       });
   }
 }

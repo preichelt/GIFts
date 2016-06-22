@@ -1,10 +1,10 @@
 import rp from 'request-promise';
 
 export class Slack {
-  constructor(responseUrl, searchTerm, site) {
+  constructor(responseUrl, searchTerm) {
     this.responseUrl = responseUrl;
     this.searchTerm = searchTerm;
-    this.site = site;
+    this.rp = rp;
   }
 
   options(bodyText, responseType = 'ephemeral') {
@@ -22,14 +22,10 @@ export class Slack {
   }
 
   sendResponse(bodyText, responseType = 'ephemeral') {
-    return rp(this.options(bodyText, responseType));
+    return this.rp(this.options(bodyText, responseType));
   }
 
-  sendErrorResponse() {
-    const bodyText = `:warning: error searching for *${
-      this.searchTerm
-    }* on ${this.site} please try again :warning:`;
-
+  sendErrorResponse(bodyText) {
     this.sendResponse(bodyText)
       .then(results => {
         console.log('successfully responded with ERROR to slack');
@@ -39,11 +35,7 @@ export class Slack {
       });
   }
 
-  sendNoUrlsResponse(ext = 'gif') {
-    const bodyText = `:zero: ${ext}s found for *${
-      this.searchTerm
-    }* on ${this.site} :thumbsdown:`;
-
+  sendNoUrlsResponse(bodyText) {
     this.sendResponse(bodyText)
       .then(results => {
         console.log('successfully responded with NO URL to slack');
